@@ -30,13 +30,16 @@ def sha1(m):
         chunk = m_bin[i:i+64]
         # break each chunk to words of 4 bytes (16 words)
         word = [0] * 80
-        for j in range(0, 64-4, 4):
+        for j in range(0, 64, 4):
             w = chunk[j:j+4]
-            word[j:j+4] = struct.unpack(b'>I', w)[0]
+            j_unpacked = int(j/4)
+            word[j_unpacked] = struct.unpack(b'>I', w)[0]
 
         # extend the 16 words to 80 words
         for k in range(16, 80):
-            word[j] = _left_rotate(word[k - 3] ^ word[k - 8] ^ word[k - 14] ^ word[k - 16], 1)
+            compress_function = word[k - 3] ^ word[k - 8] ^ word[k - 14] ^ word[k - 16]
+            word[j] = ((compress_function << 1) | (compress_function >> (32 - 1))) & 0xffffffff
+
 
 
     # after this step, the length of m_bin is = 448 mod 512
